@@ -15,3 +15,14 @@
 //= require bootstrap
 //= require turbolinks
 //= require_tree .
+
+$(document).ready(function(){
+  var options = {
+    'maxCharacterSize': 140,
+    'originalStyle': 'micropost_counter',
+    'warningStyle' : 'micropost_warning',
+    'warningNumber': 40
+  };
+  $('#micropost_content').textareaCount(options);
+
+});

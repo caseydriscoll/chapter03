@@ -3,6 +3,7 @@ require 'spec_helper'
 describe "StaticPages" do
 
   subject { page } 
+  let(:user) { FactoryGirl.create(:user) }
 
   it "should have the right links on the layout" do
     visit root_path
@@ -33,7 +34,6 @@ describe "StaticPages" do
     it { should_not have_title('| Home') }
 
     describe "for signed-in users" do
-      let(:user) { FactoryGirl.create(:user) }
       before do
         FactoryGirl.create(:micropost, user: user, content: "Lorem ipsum")
         FactoryGirl.create(:micropost, user: user, content: "Dolor sit amet")
@@ -46,6 +46,38 @@ describe "StaticPages" do
           expect(page).to have_selector("li##{item.id}", text: item.content)
         end
       end
+      
+      describe "micropost pagination" do
+        before do 
+          31.times { FactoryGirl.create(:micropost, user: user) } 
+          visit root_path
+        end
+        after(:all) { user.microposts.delete_all }
+
+        it { should have_selector('div.pagination') }
+
+        it "should list each micropost" do
+          user.microposts.paginate(page: 1).each do |micropost|
+            expect(page).to have_selector('li', text: micropost.content)
+          end
+        end
+      end
+
+      describe "should have pluralized micropost total" do
+        it { should have_selector('.total_microposts', text: "2 microposts") }
+        it "should have a singular micropost" do
+          user.microposts.first.destroy
+          visit root_path
+          expect(page).to have_selector(".total_microposts", text: "1 micropost")
+        end
+        it "should have zero microposts" do
+          user.microposts.first.destroy
+          user.microposts.first.destroy
+          visit root_path
+          expect(page).to have_selector(".total_microposts", text: "0 microposts")
+        end
+      end
+
     end
   end
 
