@@ -46,8 +46,23 @@ describe "Authentication" do
 
   describe "authorization" do
 
+    describe "for signed-in users" do
+      let(:user) { FactoryGirl.create(:user) }
+
+      describe "in the Users controller" do
+        pending "visiting the new action" 
+        pending "visiting the create action"
+      end
+    end
+
     describe "for non-signed-in users" do
       let(:user) { FactoryGirl.create(:user) }
+
+      describe "the navigation" do
+        before { visit root_url }
+        it { should_not have_link('Profile') }
+        it { should_not have_link('Settings') }
+      end
 
       describe "in the Users controller" do
 
@@ -74,11 +89,30 @@ describe "Authentication" do
         end
 
         describe "after signing in" do
-          it "should render teh desired protected page" do
+          it "should render the desired protected page" do
             expect(page).to have_title('Edit user')
           end
         end
+
+        describe "when signing in again" do
+          before do
+            delete signout_path
+            visit signin_path
+            valid_signin(user)
+          end
+          it "should render the default (profile) page" do
+            expect(page).to have_title(user.name)
+          end
+        end
       end
+    end
+
+    describe "as admin user" do
+      let(:user) { FactoryGirl.create(:user) }
+      before { sign_in user }
+
+      pending "submitting a DELETE request to the Users#destroy action" 
+
     end
 
     describe "as non-admin user" do
@@ -108,8 +142,5 @@ describe "Authentication" do
         specify { expect(response).to redirect_to(root_url) }
       end
     end
-
   end
-
-
 end

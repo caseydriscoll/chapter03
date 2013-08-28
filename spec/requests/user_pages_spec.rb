@@ -79,10 +79,10 @@ describe "UserPages" do
 
     describe "with valid information" do
       before do
-        fill_in "Name",         with: "Example User"
-        fill_in "Email",        with: "user@example.com"
-        fill_in "Password",     with: "foobar"
-        fill_in "Confirmation", with: "foobar"
+        fill_in "Name",             with: "Example User"
+        fill_in "Email",            with: "user@example.com"
+        fill_in "Password",         with: "foobar"
+        fill_in "Confirm Password", with: "foobar"
       end
 
       it "should create a user" do
@@ -147,6 +147,14 @@ describe "UserPages" do
       before { click_button "Save changes" }
 
       it { should have_content('error') }
+    end
+
+    describe "forbidden attributes" do
+      let(:params) do
+        { user: { admin: true, password: user.password, password_confirmation: user.password } }
+      end
+      before { patch user_path(user), params }
+      specify { expect(user.reload).not_to be_admin }
     end
   end
 end
